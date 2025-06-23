@@ -7,7 +7,9 @@ const router = express.Router()
 
 //router.route('/').get((req,res) => res.send('hello world'))
 //gets full movie object
-router.route('/').get(MoviesController.apiGetMovies)
+router.route('/')
+    .get(MoviesController.apiGetMovies)
+    .post(MoviesController.apiPostMovie)
 
 //route gets specific movies and their ratings
 router.route("/id/:id").get(MoviesController.apiGetMovieById)

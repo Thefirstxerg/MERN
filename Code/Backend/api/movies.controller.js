@@ -63,4 +63,19 @@ export default class MoviesController{
         }
     }
 
+    static async apiPostMovie(req, res, next) {
+        console.log("apiPostMovie called", req.body);
+        try {
+            const movieData = req.body;
+            const insertResult = await MoviesDAO.addMovie(movieData);
+            if (insertResult.insertedId) {
+                res.status(201).json({ status: "success", insertedId: insertResult.insertedId });
+            } else {
+                res.status(500).json({ error: "Failed to insert movie" });
+            }
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    }
+
 }

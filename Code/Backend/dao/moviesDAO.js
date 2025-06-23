@@ -88,4 +88,14 @@ export default class MoviesDAO{
         }
     }
 
+    static async addMovie(movieData) {
+        try {
+            const result = await movies.insertOne(movieData);
+            return result;
+        } catch (e) {
+            console.error(`Unable to insert movie: ${e}`);
+            return { error: e };
+        }
+    }
+
 }
