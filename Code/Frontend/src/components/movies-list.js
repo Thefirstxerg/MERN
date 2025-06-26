@@ -8,36 +8,31 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
 
-
+// MoviesList component displays a list of movies with search and pagination
 const MoviesList = props => {
 
+   // State variables for movies, search fields, ratings, pages, and search mode
    const [movies, setMovies] = useState([])
    const [searchTitle, setSearchTitle] = useState("")
    const [searchRating, setSearchRating] = useState("")
    const [ratings, setRatings] = useState(["All Ratings"])
-   //ch 23
-   const [currentPage, setCurrentPage] = useState(0);//keep track of current page shown
-   const [entriesPerPage, setEntriesPerPage] = useState(0); //particular page
-   //ch 24
-   const [currentSearchMode, setCurrentSearchMode] = useState("");//can findByTitle or by Rating
+   const [currentPage, setCurrentPage] = useState(0); // current page number
+   const [entriesPerPage, setEntriesPerPage] = useState(0); // number of entries per page
+   const [currentSearchMode, setCurrentSearchMode] = useState(""); // search mode: by title or rating
 
+   // Reset to first page when search mode changes
    useEffect(() => {
       setCurrentPage(0)
-      //page is changed and can be filtered according title etc.
       // eslint-disable-next-line 
    }, [currentSearchMode])
-   //ch 23
 
-   //retrieve next page is rendered once only
+   // Fetch next page of movies when currentPage changes
    useEffect(() => {
-      // retrieveMovies()
       retrieveNextPage()
-      //passing current page
       // eslint-disable-next-line 
    }, [currentPage])
 
-   //uses if logic to invoke functions
-   //ch 23
+   // Decide which retrieval function to call based on search mode
    const retrieveNextPage = () => {
       if (currentSearchMode === 'findByTitle')
          findByTitle()
@@ -47,23 +42,21 @@ const MoviesList = props => {
          retrieveMovies()
    }
 
+   // On component mount, fetch all movies and ratings
    useEffect(() => {
       retrieveMovies()
       retrieveRatings()
-      //empty array used to invoke functions only once
       // eslint-disable-next-line 
    }, [])
 
-   
+   // Fetch all movies for the current page
    const retrieveMovies = () => {
-      //ch 23
       setCurrentSearchMode("")
       MovieDataService.getAll(currentPage)
          .then(response => {
             console.log(response.data)
-            setMovies(response.data.movies) // assign to movies state
+            setMovies(response.data.movies)
             setCurrentPage(response.data.page)
-            //ch 23
             setEntriesPerPage(response.data.entries_per_page)
          })
          .catch(e => {
@@ -71,6 +64,7 @@ const MoviesList = props => {
          })
    }
 
+   // Fetch all available ratings for the dropdown
    const retrieveRatings = () => {
       MovieDataService.getRatings()
          .then(response => {
@@ -82,6 +76,7 @@ const MoviesList = props => {
          })
    }
 
+   // Handlers for search input changes
    const onChangeSearchTitle = e => {
       const searchTitle = e.target.value
       setSearchTitle(searchTitle);
@@ -92,11 +87,18 @@ const MoviesList = props => {
       setSearchRating(searchRating);
    }
 
+   // Reset search form and reload all movies
+   const clearForm = () => {
+      setSearchTitle("");
+      setSearchRating("All Ratings");
+      setCurrentSearchMode("");
+      setCurrentPage(0);
+      retrieveMovies();
+   }
 
-
+   // Generic find function for searching by title or rating
    const find = (query, by) => {
-      //ch 23
-      MovieDataService.find(query, by, currentPage)//adding currentPage argument
+      MovieDataService.find(query, by, currentPage)
          .then(response => {
             console.log(response.data)
             setMovies(response.data.movies)
@@ -105,14 +107,15 @@ const MoviesList = props => {
             console.log(e)
          })
    }
-   // find function sypported by below two methods
+
+   // Search by title
    const findByTitle = () => {
-      //ch 24
       setCurrentSearchMode("findByTitle")
-      find(searchTitle, "title")// Pass the searchTitle and currentPage to the API call
+      find(searchTitle, "title")
    }
+
+   // Search by rating, or show all if "All Ratings" is selected
    const findByRating = () => {
-      //ch 24
       setCurrentSearchMode("findByRating")
       if (searchRating === "All Ratings") {
          retrieveMovies()
@@ -125,6 +128,7 @@ const MoviesList = props => {
    return (
       <div className="App">
          <Container>
+            {/* Search form for title and rating */}
             <Form>
                <Row>
                   <Col>
@@ -163,8 +167,17 @@ const MoviesList = props => {
                      </Button>
                   </Col>
                </Row>
+               <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={clearForm}
+                  style={{ marginBottom: '1rem' }}
+               >
+                  Reset Search
+               </Button>
             </Form>
 
+            {/* Display movies as cards */}
             <Row>
                {movies.map((movie) => {
                   return (
@@ -188,7 +201,7 @@ const MoviesList = props => {
             </Row>
 
          </Container><br />
-         {/* ch 23 */}
+         {/* Pagination controls */}
          Showing page: {currentPage}
          <Button
             variant="link"
@@ -200,8 +213,4 @@ const MoviesList = props => {
    );
 }
 
-
 export default MoviesList;
-
-
-
